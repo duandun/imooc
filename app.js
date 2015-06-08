@@ -1,13 +1,5 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-// var app = express();
-
-// app.set('view engine', 'jade');
-// app.set('port', 3000);
-
-// app.get('/', function(req, res){
-// 	res.render('index', {title: 'imooc'});
-// });
 var path = require('path');
 var mongoose = require('mongoose');
 var _ = require('underscore');
@@ -15,6 +7,7 @@ var port = process.env.PORT || 3000;
 var app = express();
 
 var Movie = require('./models/movie');
+var User = require('./models/user.js');
 mongoose.connect('mongodb://localhost/imooc');
 
 app.locals.moment = require('moment');
@@ -38,6 +31,50 @@ app.get('/', function(req, res) {
 	})
 	
 });
+
+// signup
+app.post('/user/signup', function(req,res) {
+	//  /user/signup/:userid
+	// var _userid = req.params.userid;
+
+	// /user/signup/111?userid=1112
+	// var _userid = req.query.userid;
+
+//	var _user = req.body.user;
+	var _user = req.body.user;
+	var user = new User(_user);
+	User.find({name: _user.name}, function(err, user){
+		if (err) {
+			console.log(err);
+		}
+		if (user) {
+			return res.redirect('/');
+		} else {
+			user.save(function(err, user) {
+				if (err) {
+					console.log(err);
+				}
+				console.log(user);
+				res.redirect('/admin/userlist');
+			});
+		}
+	});
+	
+});
+
+// user list page
+app.get('/admin/userlist', function(req, res) {
+	User.fetch(function(err, users){
+		if (err) {
+			console.log(err);
+		}
+		res.render('userlist', {
+			title: 'user 列表页',
+			users: users
+		})
+	});
+});
+
 // detail page
 app.get('/movie/:id', function(req, res) {
 	var id = req.params.id;

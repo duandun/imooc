@@ -26,19 +26,19 @@ UserSchema.pre('save', function(next) {
 	} else {
 		this.meta.updateAt = Date.now();
 	}
-	bcrypt.genSalt(SALT_WORK_FACTOR,function(err, salt) {
+	
+	bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
 		if (err) {
 			return next(err);
 		}
-		bcrypt.has(user.password, salt, function(err, hash) {
+		bcrypt.hash(user.password, salt, function(err, hash) {
 			if (err) return next(err);
-
 			user.password = hash;
+			console.log(user.password);
 			next();
 		});
-
 	});
-	next();
+//	next();
 });
 
 UserSchema.statics = {
