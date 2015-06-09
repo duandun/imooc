@@ -32,6 +32,35 @@ app.get('/', function(req, res) {
 	
 });
 
+// signin
+app.post('/user/signin', function(req, res) {
+	var _user = req.body.user;
+	var name = _user.name;
+	var password = _user.password;
+	console.log('signin');
+	User.findOne({name: name}, function(err, user) {
+		if (err) {
+			console.log(err);
+		}
+		if (!user) {
+			console.log(user);
+			return res.redirect('/');
+		}
+
+		user.comparePassword(password, function(err, isMatch) {
+			if (err) {
+				console.log(err);
+			}
+			if (isMatch) {
+				console.log('password is matched');
+				return res.redirect('/');
+			} else {
+				console.log('password is not matched');
+			}
+		});
+	});
+});
+
 // signup
 app.post('/user/signup', function(req,res) {
 	//  /user/signup/:userid
@@ -41,15 +70,17 @@ app.post('/user/signup', function(req,res) {
 	// var _userid = req.query.userid;
 
 //	var _user = req.body.user;
-	var _user = req.body.user;
-	var user = new User(_user);
+	console.log('signup');
+	var _user = req.body.user;	
 	User.find({name: _user.name}, function(err, user){
 		if (err) {
 			console.log(err);
 		}
-		if (user) {
+		if (user.length != 0) {
+			console.log(user);	
 			return res.redirect('/');
 		} else {
+			var user = new User(_user);
 			user.save(function(err, user) {
 				if (err) {
 					console.log(err);
