@@ -2,6 +2,7 @@ var Index = require('../app/controllers/index.js');
 var User = require('../app/controllers/user.js');
 var Movie = require('../app/controllers/movie.js');
 var Comment = require('../app/controllers/comment.js'); 
+var Category = require('../app/controllers/category.js');
 
 module.exports = function(app) {
 	// pre handle user
@@ -25,11 +26,16 @@ module.exports = function(app) {
 	// Movie
 	app.get('/movie/:id', Movie.detail);
 	app.get('/admin/movie/new', User.signinRquired, User.adminRequired,Movie.new);
-	app.put('/admin/movie/update/:id', User.signinRquired, User.adminRequired,Movie.update);
+	app.get('/admin/movie/update/:id', User.signinRquired, User.adminRequired, Movie.update);
 	app.post('/admin/movie', User.signinRquired, User.adminRequired, Movie.save);
 	app.get('/admin/movie/list', User.signinRquired, User.adminRequired, Movie.list);
 	app.delete('/admin/movie/list', User.signinRquired, User.adminRequired, Movie.del);
 
 	// Comment
 	app.post('/user/comment', User.signinRquired,  Comment.save);
+
+	// Category
+	app.get('/admin/category/new', User.signinRquired, User.adminRequired, Category.new);
+	app.post('/admin/category', User.signinRquired, User.adminRequired, Category.save);
+	app.get('/admin/category/list', User.signinRquired, User.adminRequired, Category.list);
 };

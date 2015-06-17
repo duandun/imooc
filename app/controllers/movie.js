@@ -1,5 +1,6 @@
 var Movie = require('../models/movie.js');
 var Comment = require('../models/comment');
+var Category = require('../models/category');
 var _ = require('underscore');
 
 // detail page
@@ -27,12 +28,16 @@ exports.detail = function(req, res) {
 
 // 	admin update movie
 exports.update = function(req, res) {
+	console.log('update');
 	var id = req.params.id;
 	if(id) {
 		Movie.findById(id, function(err, movie) {
-			res.render('admin', {
-				title: 'imooc 后台更新页' ,
-				movie: movie
+			Category.find({}, function(err, categories) {
+				res.render('admin', {
+					title: 'imooc 后台更新页' ,
+					movie: movie,
+					categories: categories
+				});
 			});
 		});
 	}
@@ -41,9 +46,11 @@ exports.update = function(req, res) {
 // admin post movie
 exports.save = function(req, res) {
 	var id = req.body.movie._id;
+	console.log(id);
 	var movieObj = req.body.movie;
+	console.log(movieObj);
 	var _movie;
-	if(id != 'undefined') {
+	if(id) {
 		Movie.findById(id, function(err, movie) {
 			if(err) {
 				console.log(err);
@@ -57,21 +64,19 @@ exports.save = function(req, res) {
 			});
 		});
 	} else {
-		_movie = new Movie({
-			doctor: movieObj.doctor,
-			title: movieObj.title,
-			country: movieObj.country,
-			language: movieObj.language,
-			year: movieObj.year,
-			poster: movieObj.poster,
-			summary: movieObj.summary,
-			flash: movieObj.flash,
-		});
+		_movie = new Movie(movieObj);
+		var categoryId = _movie.category;
 		_movie.save(function(err, movie) {
 			if (err) {
 				console.log(err);
 			} 
-			res.redirect('/movie/' + movie._id);
+			Category.findById(categoryId, function(err, category) {
+				category.movies.push(movie._id);
+
+				category.save(function(err, category) {
+					res.redirect('/movie/' + movie._id);
+				});
+			});
 		});
 	}
 };
@@ -91,18 +96,15 @@ exports.list = function(req, res) {
 
 // admin page
 exports.new = function(req, res) {
-	res.render('admin', {
-		title: 'imooc 后台录入页面',
-		movie: {
-			doctor: '',
-			country: '',
-			title: '',
-			year: '',
-			poster: '',
-			language: '',
-			flash: '',
-			summary: ''
+	Category.find({}, function(err, categories) {
+		if (err) {
+			console.log(err);
 		}
+		res.render('admin', {
+			title: 'imooc 后台录入页面',
+			categories: categories,
+			movie: {}
+		});
 	});
 };
 
